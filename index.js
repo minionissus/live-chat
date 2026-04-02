@@ -10,11 +10,15 @@ const dirname = path.dirname(filename)
 console.log(dirname)
 
 app.use(express.static(path.join(dirname, 'public')))
-app.use(express.urlencoded({extended:true}))
+app.use(express.urlencoded({extended: true}))
+
+app.set('view engine', 'ejs')
+app.set('views', path.join(dirname, 'views'))
 
 app.post('/join', (req, res) => {
     const nickname = req.body.nickname
-    res.send('Welcome ' + nickname)
+    
+    res.render('chat' , {nickname})
 })
 
 app.listen(3000, () => {
