@@ -9,6 +9,7 @@
     height: 85vh;
     background-color: aquamarine;
     padding: 30px;
+    overflow-y: auto;
 }
 
 .send-form input {
