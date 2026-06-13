@@ -7,3 +7,4 @@
 * direct messages
 * nickname validation
 * auto focus on the input boxes
+* display date and time messages were sent (done)
