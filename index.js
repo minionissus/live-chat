@@ -2,6 +2,7 @@ import { dir } from 'console'
 import express from 'express'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { writeFile, readFile } from 'fs/promises'
 
 const app = express()
 
@@ -20,7 +21,21 @@ let messageId = 1
 const data = []
 const users = [];
 
-app.post('/join', (req, res) => {
+try {
+    const rawData = await readFile('chat_history.json', 'utf-8')
+    const jsonData = JSON.parse(rawData)
+    users.push(...jsonData.users)
+    data.push(...jsonData.history)
+    messageId = Math.max(...data.map(d => d.id)) + 1
+} catch (err) {
+    if (err.code === 'ENOENT') {
+        console.log('File not found. Start fresh.')
+    } else {
+        throw err
+    }
+}
+
+app.post('/join', async (req, res) => {
     const nickname = req.body.nickname
     const lastMessageId = messageId++
     data.push({
@@ -30,11 +45,12 @@ app.post('/join', (req, res) => {
         datetime: new Date()
     });
     users.push(nickname);
-    
+
+    await writeFile('chat_history.json', JSON.stringify({ users: users, history: data }, null, 2))
     res.render('chat' , { nickname, lastMessageId: lastMessageId - 1 })
 })
 
-app.post('/send', (req, res) => {
+app.post('/send', async (req, res) => {
     const msg = req.body.messageContent
     const nickname = req.body.nickname
     console.log(msg, ', ', nickname)
@@ -44,6 +60,7 @@ app.post('/send', (req, res) => {
         message: msg,
         datetime: new Date()
     })
+    await writeFile('chat_history.json', JSON.stringify({ users: users, history: data }, null, 2))
     res.send('OK')
 })
 
